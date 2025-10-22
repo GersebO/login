@@ -1,10 +1,12 @@
 import { create } from 'zustand';
 
+import jwt, { JwtPayload } from 'jsonwebtoken';
+
 import { devtools } from 'zustand/middleware';
 
 import { UserState } from '@/store/Interfaces/user';
 
-import { validate, getAll, validate2FA } from '../services/user.service';
+import { validate, getByCustomerId } from '../services/user.service';
 
 
 interface UserStore {
@@ -13,9 +15,9 @@ interface UserStore {
   isLoading: boolean;
   isError: boolean;
   errorMessage?: string;
-  validate: (email: string, password: string) => Promise<void>;
-  validate2FA: (id: string, token: string) => Promise<boolean>;
-  getAll: () => Promise<void>;
+  validate: (login: string, password: string) => Promise<void>;
+
+  getByCustomerId: (customerId: string) => Promise<void>;
   reset: () => void;
 }
 
@@ -23,6 +25,7 @@ const initialState: UserState = {
   email: '',
   name: '',
   id: 0,
+  customers: [],
 };
 
 
@@ -35,12 +38,19 @@ export const userStore = create<UserStore>()(
       errorMessage: '',
 
       /* validar*/
-      validate: async (email, password) => {
+      validate: async (login, password) => {
         try {
           set({ isLoading: true });
-          const user = await validate(email, password);
+          const user = await validate(login, password);
+          const jwtData = jwt.decode(user.data) as JwtPayload | null;
           set({
-            user: user || initialState,
+            user: 
+                jwtData ? { id: jwtData.data.id || 0,
+                email: jwtData.data.email || '',
+                name: jwtData.data.name || ''+jwtData.data.paternallastName ,
+                customers: jwtData.data.customers || [],
+              } 
+              : initialState,
             isLoading: false,
             isError: false,
           });
@@ -54,34 +64,12 @@ export const userStore = create<UserStore>()(
         }
       },
 
-      /*validate2FA que si se usa  */
-      validate2FA: async (id, token) => {
+      getByCustomerId: async (customerId) => {
         try {
           set({ isLoading: true });
-          const response = await validate2FA(id, token);
+          const users = await getByCustomerId(customerId);
           set({
-            user: response.data,
-            isLoading: false,
-            isError: false,
-          });
-          return true;
-        } catch (e) {
-          set({
-            isError: true,
-            errorMessage: (e as Error).message,
-            isLoading: false,
-          });
-          return false;
-        }
-      },
-
-      /*obtener todo */
-      getAll: async () => {
-        try {
-          set({ isLoading: true });
-          const users = await getAll();
-          set({
-            userList: users.personList || [],
+            userList: users.data || [],
             isLoading: false,
             isError: false,
           });

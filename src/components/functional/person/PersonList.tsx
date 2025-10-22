@@ -4,26 +4,27 @@ import Link from 'next/link';
 import { useUser } from '@/store/hooks';
 
 const PersonList = () => {
-  const { userList, userGetAll } = useUser();
+  const { userList, userGetByCustomerId, user } = useUser();
 
   // Cargar la lista de personas al montar el componente
-  useEffect(() => {
-    userGetAll();
-  }, [userGetAll]);
+    useEffect(() => {
+      if (user?.id) {
+        userGetByCustomerId(String(user.id)); 
+      }
+    }, [user?.id, userGetByCustomerId]);
 
   return (
     <div>
-      {userList?(
+      {userList ? (
         userList.map((person) => (
           <div key={person.id} >
             <Link href={`/person/${person.id}`}>{person.name}</Link>
           </div>
         ))
-      ): (
+      ) : (
         <p>No hay personas disponibles</p>
       )}
     </div>
   );
 };
-
 export default PersonList;

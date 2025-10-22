@@ -1,5 +1,4 @@
 import React from 'react'
-import Link from 'next/link';
 import { useUser } from '@/store/hooks';
 
 interface PersonDetailProps {
@@ -7,12 +6,14 @@ interface PersonDetailProps {
 }
 
 const PersonDetail = ({ id }: PersonDetailProps) => {
-    const { userList, userGetAll } = useUser();
+    const { userList,userGetByCustomerId,user } = useUser();
 
     // Cargar la lista de personas al montar el componente
     React.useEffect(() => {
-        userGetAll();
-    }, [userGetAll]);
+        if (user?.id) {
+        userGetByCustomerId(String(user.id)); 
+        }
+    }, [user?.id, userGetByCustomerId]);
 
     const person = userList ? userList.find((p) => p.id.toString() === id) : null;
     
