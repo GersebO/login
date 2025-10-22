@@ -1,40 +1,54 @@
-import React from 'react'
-import { useUser } from '@/store/hooks';
+"use client";
 
-interface PersonDetailProps {
-    id: string;
-}
+import { useEffect, useState } from "react";
+import { useUser } from "@/store/hooks";
 
-const PersonDetail = ({ id }: PersonDetailProps) => {
-    const { userList,userGetByCustomerId,user } = useUser();
+export default function PersonDetail() {
+  const { user, userGetMe } = useUser();
 
-    // Cargar la lista de personas al montar el componente
-    React.useEffect(() => {
-        if (user?.id) {
-        userGetByCustomerId(String(user.id)); 
-        }
-    }, [user?.id, userGetByCustomerId]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    const person = userList ? userList.find((p) => p.id.toString() === id) : null;
-    
-    return (
-        <div>
-            {person ? (
-                <div>
-                    <h2>Detalle de la Persona</h2>
-                    <div>
-                        <p><strong>ID:</strong> {person.id}</p>
-                        <p><strong>Nombre:</strong> {person.name}</p>
-                        {person.email && <p><strong>Email:</strong> {person.email}</p>}
-                    </div>
-                </div>
-            ) : (
-                <div>
-                    <p>Persona no encontrada</p>
-                </div>
-            )}
+  useEffect(() => {
+    console.log("Token actual:", localStorage.getItem("token"));
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        await userGetMe(); 
+      } catch (err: any) {
+        console.error("Error al obtener usuario:", err);
+        setError("Ocurrió un error al cargar los datos del usuario.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [userGetMe]);
+
+  // === Renderizado condicional ===
+  if (loading) return <p>Cargando detalle...</p>;
+  if (error) return <p className="text-red-500">{error}</p>;
+  if (!user || !user.id) return <p>No se encontró información del usuario.</p>;
+
+  return (
+    <div className="p-4 border rounded-lg shadow-md bg-white">
+      <h1 className="text-2xl font-bold mb-3">Detalle del Usuario</h1>
+      <p><strong>ID:</strong> {user.id}</p>
+      <p><strong>Nombre:</strong> {user.name}</p>
+      {user.email && <p><strong>Email:</strong> {user.email}</p>}
+
+      {user.customers && user.customers.length > 0 && (
+        <div className="mt-4">
+          <h2 className="text-lg font-semibold mb-2">Customers Asociados:</h2>
+          <ul className="list-disc list-inside">
+            {user.customers.map((c: any) => (
+              <li key={c.id}>{c.name}</li>
+            ))}
+          </ul>
         </div>
-    )
+      )}
+    </div>
+  );
 }
-
-export default PersonDetail

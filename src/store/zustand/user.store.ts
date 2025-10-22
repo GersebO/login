@@ -6,7 +6,7 @@ import { devtools } from 'zustand/middleware';
 
 import { UserState } from '@/store/Interfaces/user';
 
-import { validate, getByCustomerId } from '../services/user.service';
+import { validate, getByCustomerId, getMe } from '../services/user.service';
 
 
 interface UserStore {
@@ -19,6 +19,8 @@ interface UserStore {
 
   getByCustomerId: (customerId: string) => Promise<void>;
   reset: () => void;
+
+  getMe: () => Promise<void>;
 }
 
 const initialState: UserState = {
@@ -75,6 +77,24 @@ export const userStore = create<UserStore>()(
           });
         } catch (e) {
           set({
+            isError: true,
+            errorMessage: (e as Error).message,
+            isLoading: false,
+          });
+        }
+      },
+      getMe: async () => {
+        try {
+          set({ isLoading: true });
+          const user = await getMe();
+          set({
+            user: user.data || initialState,
+            isLoading: false,
+            isError: false,
+          });
+        } catch (e) {
+          set({
+            user: initialState,
             isError: true,
             errorMessage: (e as Error).message,
             isLoading: false,

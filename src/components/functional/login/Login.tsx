@@ -14,15 +14,17 @@ const Login = () => {
   };
 
   // Redirigir cuando el usuario se autentica
-  useEffect(() => {
-    if (user.email) {
-      router.push('/person');
-    }
-  }, [user.email, router]);
 
   useEffect(() => {
     setTitle("Login ");
-  }, []);  
+  }, [setTitle]);
+
+  useEffect(() => {
+    // Si el usuario ya tiene email, redirigir a /person
+    if (user?.email) {
+      router.push('/person');
+    }
+  }, [user?.email, router]);
   return (
     <div>
       <h1 className="text-2xl font-bold">Validacion de usuario</h1>

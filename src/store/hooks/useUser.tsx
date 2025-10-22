@@ -7,6 +7,7 @@ const useUser = () => {
     validate,
     getByCustomerId,
     reset,
+    getMe,
   } = userStore();
   
   return { 
@@ -14,7 +15,8 @@ const useUser = () => {
     userList,
     userValidate: validate,
     userGetByCustomerId: getByCustomerId,
-    userReset: reset
+    userReset: reset,
+    userGetMe: getMe,
   };
 };
 

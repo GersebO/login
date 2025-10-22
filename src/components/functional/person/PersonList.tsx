@@ -1,30 +1,21 @@
-import React, { useEffect } from 'react'
-import Link from 'next/link';
+"use client";
+import Link from "next/link";
+import { UserState } from "@/store/Interfaces/user";
 
-import { useUser } from '@/store/hooks';
-
-const PersonList = () => {
-  const { userList, userGetByCustomerId, user } = useUser();
-
-  // Cargar la lista de personas al montar el componente
-    useEffect(() => {
-      if (user?.id) {
-        userGetByCustomerId(String(user.id)); 
-      }
-    }, [user?.id, userGetByCustomerId]);
+export default function PersonList({ customers }: { customers: UserState[] }) {
+  if (!customers || customers.length === 0) {
+    return <p>No hay personas disponibles</p>;
+  }
 
   return (
-    <div>
-      {userList ? (
-        userList.map((person) => (
-          <div key={person.id} >
-            <Link href={`/person/${person.id}`}>{person.name}</Link>
-          </div>
-        ))
-      ) : (
-        <p>No hay personas disponibles</p>
-      )}
-    </div>
+    <ul>
+      {customers.map((customer) => (
+        <li key={customer.id} className="mb-2">
+          <Link href={`/person/${customer.id}`}>
+            {customer.name}
+          </Link>
+        </li>
+      ))}
+    </ul>
   );
-};
-export default PersonList;
+}
