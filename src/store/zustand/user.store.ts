@@ -6,7 +6,7 @@ import { devtools } from 'zustand/middleware';
 
 import { UserState } from '@/store/Interfaces/user';
 
-import { validate, getByCustomerId, getMe } from '../services/user.service';
+import { validate, getByCustomerId} from '../services/user.service';
 
 
 interface UserStore {
@@ -45,6 +45,7 @@ export const userStore = create<UserStore>()(
           set({ isLoading: true });
           const user = await validate(login, password);
           const jwtData = jwt.decode(user.data) as JwtPayload | null;
+          console.log(jwtData);
           set({
             user: 
                 jwtData ? { id: jwtData.data.id || 0,
@@ -77,24 +78,6 @@ export const userStore = create<UserStore>()(
           });
         } catch (e) {
           set({
-            isError: true,
-            errorMessage: (e as Error).message,
-            isLoading: false,
-          });
-        }
-      },
-      getMe: async () => {
-        try {
-          set({ isLoading: true });
-          const user = await getMe();
-          set({
-            user: user.data || initialState,
-            isLoading: false,
-            isError: false,
-          });
-        } catch (e) {
-          set({
-            user: initialState,
             isError: true,
             errorMessage: (e as Error).message,
             isLoading: false,

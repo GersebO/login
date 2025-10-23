@@ -1,3 +1,4 @@
+import { log } from 'console';
 import { api,apiWithToken } from '../../utils/api';
 
 import { decrypt } from '@/utils/crypto';
@@ -49,14 +50,3 @@ export const validate2FA = async (id: string, token: string) => {
   }
 };
 
-export const getMe = async () => {
-  try {
-    const { data } = await apiWithToken.get("/user/me");
-    return data;
-  } catch (error: unknown) {
-    const axiosError = error as { response?: { data?: { message?: string } } };
-    throw new Error(
-      axiosError.response?.data?.message || "Error al obtener información del usuario"
-    );
-  }
-};

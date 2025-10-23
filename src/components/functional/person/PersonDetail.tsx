@@ -4,18 +4,21 @@ import { useEffect, useState } from "react";
 import { useUser } from "@/store/hooks";
 
 export default function PersonDetail() {
-  const { user, userGetMe } = useUser();
+  const { user, userGetByCustomerId } = useUser();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log("Token actual:", localStorage.getItem("token"));
     const fetchData = async () => {
       try {
         setLoading(true);
-        setError(null);
-        await userGetMe(); 
+        setError(null); 
+        if (user?.id != null) {
+          await userGetByCustomerId(String(user.id));
+        } else {
+          setError("El usuario no tiene un ID válido.");
+        }
       } catch (err: any) {
         console.error("Error al obtener usuario:", err);
         setError("Ocurrió un error al cargar los datos del usuario.");
@@ -25,9 +28,8 @@ export default function PersonDetail() {
     };
 
     fetchData();
-  }, [userGetMe]);
+  }, [userGetByCustomerId, user.id]);
 
-  // === Renderizado condicional ===
   if (loading) return <p>Cargando detalle...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
   if (!user || !user.id) return <p>No se encontró información del usuario.</p>;
